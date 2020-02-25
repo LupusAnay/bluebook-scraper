@@ -1,4 +1,4 @@
-use crate::api::{client_factory, get_page};
+use crate::api::{client_factory, get_search_page};
 use crate::error::Error;
 use crate::parser::{get_page_ids, get_pages_count};
 use reqwest::Client;
@@ -6,6 +6,7 @@ use serde_json::from_reader;
 use std::fs::File;
 
 mod api;
+mod data;
 mod error;
 mod parser;
 
@@ -18,7 +19,7 @@ async fn main() {
 }
 
 async fn get_companies_ids_from_class(client: Client, class_id: i32) -> Result<Vec<i32>, Error> {
-    let page = get_page(client, class_id, 1, DEFAULT_CITY).await?;
+    let page = get_search_page(client, class_id, 1, DEFAULT_CITY).await?;
     let pages_count = get_pages_count(&page).await?;
     let first_page_ids = get_page_ids(&page).await?;
 
