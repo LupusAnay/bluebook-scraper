@@ -17,7 +17,7 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 impl From<ParseIntError> for Error {
-    fn from(e: ParseIntError) -> Self {
+    fn from(_: ParseIntError) -> Self {
         Error::DataConvertError
     }
 }
