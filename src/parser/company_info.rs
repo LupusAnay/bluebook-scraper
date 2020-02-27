@@ -1,8 +1,8 @@
-use select::document::Document;
 use crate::data::CompanyInfo;
 use crate::parser::Error;
-use select::predicate::{Name, Class, Attr, Predicate};
 use futures::join;
+use select::document::Document;
+use select::predicate::{Attr, Class, Name, Predicate};
 
 pub async fn get_company_info(page: &Document) -> Result<CompanyInfo, Error> {
     let (name_result, rating, website_result, founded, size, duns, other) = join!(
@@ -19,7 +19,13 @@ pub async fn get_company_info(page: &Document) -> Result<CompanyInfo, Error> {
     let name = name_result?;
 
     Ok(CompanyInfo {
-        name, rating, website, founded, size, duns, other
+        name,
+        rating,
+        website,
+        founded,
+        size,
+        duns,
+        other,
     })
 }
 
@@ -103,13 +109,12 @@ async fn get_company_other_info(page: &Document) -> Vec<String> {
         .collect()
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::data::CompanyInfo;
+    use crate::parser::company_info::*;
     use crate::parser::*;
     use select::document::Document;
-    use crate::parser::company_info::*;
 
     #[tokio::test]
     async fn test_get_company_other_info() {

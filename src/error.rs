@@ -1,11 +1,11 @@
-use crate::parser;
+use crate::{api, parser};
 use std::fmt;
 
 #[derive(Debug)]
 pub enum Error {
     SerdeError(serde_json::Error),
     IOError(std::io::Error),
-    ReqwestError(reqwest::Error),
+    ApiError(api::Error),
     ParserError(parser::Error),
 }
 
@@ -29,14 +29,14 @@ impl std::convert::From<serde_json::error::Error> for Error {
     }
 }
 
-impl std::convert::From<reqwest::Error> for Error {
-    fn from(e: reqwest::Error) -> Self {
-        Error::ReqwestError(e)
-    }
-}
-
 impl From<parser::Error> for Error {
     fn from(e: parser::Error) -> Self {
         Error::ParserError(e)
+    }
+}
+
+impl From<api::Error> for Error {
+    fn from(e: api::Error) -> Self {
+        Error::ApiError(e)
     }
 }

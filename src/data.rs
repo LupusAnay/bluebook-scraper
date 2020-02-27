@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq)]
 pub struct CompanyLocation {
-    address: String,
-    phone_number: String,
+    pub address: String,
+    pub phone_number: String,
 }
 
 #[derive(Debug, PartialEq)]

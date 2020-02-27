@@ -3,10 +3,10 @@ pub use crate::parser::error::Error;
 use select::document::Document;
 use select::predicate::{Attr, Class, Name, Predicate};
 
-pub mod error;
-mod company_info;
 mod company_contacts;
+mod company_info;
 mod company_locations;
+pub mod error;
 
 pub async fn get_page_ids(page: &Document) -> Result<Vec<i32>, Error> {
     let mut ids = Vec::new();

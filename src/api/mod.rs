@@ -1,6 +1,8 @@
-use crate::error::Error;
+pub use crate::api::error::Error;
 use reqwest::{Client, Proxy};
 use select::document::Document;
+
+pub mod error;
 
 const SEARCH_CLASSES_URL: &str =
     "http://www.thebluebook.com/products/bluesearchtechnology/search-companies.html";
@@ -58,11 +60,22 @@ pub async fn get_company_page(client: Client, company_id: i32) -> ApiResult {
     Ok(page)
 }
 
+pub async fn get_locations_page(client: Client, company_id: i32) -> ApiResult {
+    let response = client
+        .get(format!("{}/{}/locations-contacts/", COMPANY_PAGE_URL, company_id).as_str())
+        .header("User-Agent", get_random_user_agent().await)
+        .send()
+        .await?;
+
+    let page = Document::from(response.text().await?.as_str());
+    Ok(page)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::api::*;
 
-    #[tokio::test(threaded_scheduler)]
+    #[tokio::test]
     async fn test_get_page() {
         let client = client_factory().await;
         let page = get_search_page(client, 4030, 1, "New York, NY")
@@ -70,9 +83,15 @@ mod tests {
             .unwrap();
     }
 
-    #[tokio::test(threaded_scheduler)]
+    #[tokio::test]
     async fn test_company_page() {
         let client = client_factory().await;
         let page = get_company_page(client, 400516).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_locations_page() {
+        let client = client_factory().await;
+        let page = get_locations_page(client, 400516).await.unwrap();
     }
 }
