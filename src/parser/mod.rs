@@ -40,11 +40,30 @@ pub async fn get_company_profile(page: &Document) -> Result<CompanyProfile, Erro
     unimplemented!()
 }
 
+async fn get_company_story(page: &Document) -> Result<String, Error> {
+    let story = page
+        .find(Attr("id", "proviewStory"))
+        .next()
+        .ok_or(Error::CannotFindNode)?
+        .text()
+        .trim()
+        .to_string();
+
+    Ok(story)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::data::CompanyInfo;
     use crate::parser::*;
     use select::document::Document;
+
+    #[tokio::test]
+    async fn test_get_story() {
+        let page = Document::from(include_str!("../../test-data/company.html"));
+        let story = get_company_story(&page).await.unwrap();
+        assert_eq!(story, "TEST STORY")
+    }
 
     #[tokio::test]
     async fn test_get_pages_count() {
