@@ -17,9 +17,9 @@ pub struct CompanyInfo {
 
 #[derive(Debug, PartialEq)]
 pub struct CompanyContact {
-    name: String,
-    position: String,
-    phone: String,
+    pub name: String,
+    pub position: String,
+    pub phone: String,
 }
 
 pub type Category = String;

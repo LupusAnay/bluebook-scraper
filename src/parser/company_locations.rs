@@ -6,43 +6,40 @@ use select::predicate::{Class, Name, Predicate};
 
 pub async fn get_locations(page: &Document) -> Result<Vec<CompanyLocation>, Error> {
     let mut locations = Vec::new();
-    for node in page.find(Name("h2").and(Class("pageTitle"))) {
-        if node.text().trim().starts_with("Locations") {
-            let locations_node = node
-                .parent()
-                .and_then(|n| n.find(Class("row")).next())
-                .ok_or(Error::CannotFindNode)?;
+    let locations_node = page
+        .find(
+            Name("h2")
+                .and(Class("pageTitle"))
+                .and(|n: &Node| n.text().trim().starts_with("Locations")),
+        )
+        .next()
+        .and_then(|n| n.parent())
+        .ok_or(Error::CannotFindNode)?;
 
-            let address = locations_node
-                .find(Class("col-md"))
-                .next()
-                .and_then(|n| n.find(Name("div")).next())
-                .ok_or(Error::WrongFormatNode)?
-                .text()
-                .trim()
-                .to_string();
+    for node in locations_node.find(Class("row").child(Name("div").and(Class("col-12")))) {
+        let address = node
+            .find(Class("col-md"))
+            .next()
+            .and_then(|n| n.find(Name("div")).next())
+            .ok_or(Error::WrongFormatNode)?
+            .text()
+            .trim()
+            .to_string();
 
-            let phone_number = locations_node
-                .find(Class("phoneDisp"))
-                .next()
-                .ok_or(Error::WrongFormatNode)?
-                .text()
-                .trim()
-                .to_string();
+        let phone_number = node
+            .find(Class("phoneDisp"))
+            .next()
+            .ok_or(Error::WrongFormatNode)?
+            .text()
+            .trim()
+            .to_string();
 
-            locations.push(CompanyLocation {
-                address,
-                phone_number,
-            })
-        }
+        locations.push(CompanyLocation {
+            address,
+            phone_number,
+        })
     }
     Ok(locations)
-}
-
-async fn get_header_text(header: Node<'_>) -> String {
-    let header_node_text = header.text();
-    let header_text = header_node_text.trim().to_string();
-    header_text
 }
 
 #[cfg(test)]
