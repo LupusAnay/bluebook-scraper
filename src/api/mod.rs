@@ -109,12 +109,6 @@ mod tests {
     #[tokio::test]
     async fn test_get_categories() {
         let client = client_factory().await;
-        // Set Cookies
-        get_search_page(&client, 64, 1, "New York, NY")
-            .await
-            .unwrap();
-        get_company_page(&client, 400516).await.unwrap();
-
         let page = get_categories_page(&client, 400516, "17", None)
             .await
             .unwrap();
@@ -123,11 +117,6 @@ mod tests {
     #[tokio::test]
     async fn test_get_categories_with_heading_id() {
         let mut client = client_factory().await;
-        // Set Cookies
-        get_search_page(&mut client, 64, 1, "New York, NY")
-            .await
-            .unwrap();
-        let resp = get_company_page(&mut client, 400516).await.unwrap();
 
         let page = get_categories_page(&mut client, 400516, "17", Some("642"))
             .await

@@ -110,10 +110,6 @@ mod tests {
     #[tokio::test]
     async fn test_collect_subcategories() {
         let client = client_factory().await;
-        get_company_page(&client, 922369).await.unwrap();
-        get_categories_page(&client, 922369, "11", None)
-            .await
-            .unwrap();
         let categories = collect_subcategories(&client, 922369, "11", "1669")
             .await
             .unwrap();
