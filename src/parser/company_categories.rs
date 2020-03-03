@@ -93,11 +93,9 @@ async fn collect_subcategories(
     div_id: &str,
     head_id: &str,
 ) -> Result<Vec<Category>, Error> {
-    let categories_page = get_categories_page(client, company_id, div_id, Some(head_id)).await?;
+    let categories_page = get_categories_page(&client, company_id, div_id, Some(head_id)).await?;
     let categories = categories_page
-        .find(ReText(
-            &Regex::new(r"^.*\d{2} [1-9]{2} [1-9]{2}.*$").unwrap(),
-        ))
+        .find(ReText(&Regex::new(r"^.*\d{2} \d{2} \d{2}.*$").unwrap()))
         .map(|node| node.find(Name("strong")).next())
         .filter_map(|node| node.map(|node| node.text()))
         .collect();
@@ -106,13 +104,16 @@ async fn collect_subcategories(
 
 #[cfg(test)]
 mod tests {
-    use crate::api::{client_factory, get_company_page, get_categories_page};
+    use crate::api::{client_factory, get_categories_page, get_company_page};
     use crate::parser::company_categories::*;
 
     #[tokio::test]
     async fn test_collect_subcategories() {
         let client = client_factory().await;
-        get_categories_page(&client, 922369, "11", None).await.unwrap();
+        get_company_page(&client, 922369).await.unwrap();
+        get_categories_page(&client, 922369, "11", None)
+            .await
+            .unwrap();
         let categories = collect_subcategories(&client, 922369, "11", "1669")
             .await
             .unwrap();
@@ -130,10 +131,42 @@ mod tests {
         assert_eq!(
             categories,
             vec![
+                "07 01 60",
+                "07 01 60.71",
+                "07 01 60.91",
+                "07 01 60.92",
+                "07 06 60",
+                "07 60 00.00.01",
+                "11 22 00.00.01",
+                "11 47 00.00.01",
+                "23 01 20",
+                "23 01 30",
+                "23 01 50",
+                "23 01 60",
+                "23 01 70",
+                "23 01 80",
+                "23 06 20",
+                "23 06 30",
+                "23 06 30.13",
+                "23 06 30.16",
+                "23 06 30.19",
+                "23 06 50",
+                "23 06 50.13",
+                "23 06 60",
+                "23 06 60.13",
+                "23 06 60.16",
+                "23 06 70",
+                "23 06 70.13",
+                "23 06 70.16",
+                "23 06 80",
+                "23 06 80.13",
+                "23 06 80.16",
+                "23 20 00.00.01",
                 "23 23 16",
                 "23 23 19",
                 "23 23 23",
                 "23 24 13",
+                "23 30 00.00.01",
                 "23 31 13",
                 "23 31 13.13",
                 "23 31 13.16",
@@ -165,6 +198,7 @@ mod tests {
                 "23 51 13.13",
                 "23 51 43",
                 "23 51 43.13",
+                "23 60 00.00.01",
                 "23 61 23",
                 "23 62 13",
                 "23 62 23",
@@ -200,7 +234,7 @@ mod tests {
                 "43 11 13",
                 "43 11 13.13",
                 "43 11 13.16",
-                "43 11 23",
+                "43 11 23"
             ]
         )
     }
