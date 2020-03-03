@@ -113,7 +113,6 @@ async fn get_company_other_info(page: &Document) -> Vec<String> {
 mod tests {
     use crate::data::CompanyInfo;
     use crate::parser::company_info::*;
-    use crate::parser::*;
     use select::document::Document;
 
     #[tokio::test]

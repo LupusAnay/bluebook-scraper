@@ -1,12 +1,25 @@
-use crate::data::{CompanyInfo, CompanyProfile};
+use crate::data::CompanyProfile;
 pub use crate::parser::error::Error;
+use regex::Regex;
 use select::document::Document;
-use select::predicate::{Attr, Class, Name, Predicate};
+use select::node::Node;
+use select::predicate::{Attr, Class, Predicate};
 
+mod company_categories;
 mod company_contacts;
 mod company_info;
 mod company_locations;
 pub mod error;
+
+#[derive(Copy, Clone, Debug)]
+struct ReText<'a>(&'a Regex);
+
+impl<'a> Predicate for ReText<'a> {
+    fn matches(&self, node: &Node<'_>) -> bool {
+        let text = node.text();
+        self.0.is_match(text.as_str())
+    }
+}
 
 pub async fn get_page_ids(page: &Document) -> Result<Vec<i32>, Error> {
     let mut ids = Vec::new();
@@ -54,7 +67,6 @@ async fn get_company_story(page: &Document) -> Result<String, Error> {
 
 #[cfg(test)]
 mod tests {
-    use crate::data::CompanyInfo;
     use crate::parser::*;
     use select::document::Document;
 

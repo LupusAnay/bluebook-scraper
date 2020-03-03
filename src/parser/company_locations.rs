@@ -46,7 +46,6 @@ pub async fn get_locations(page: &Document) -> Result<Vec<CompanyLocation>, Erro
 mod tests {
     use crate::data::CompanyLocation;
     use crate::parser::company_locations::*;
-    use select::predicate::Name;
 
     #[tokio::test]
     async fn test_get_locations() {

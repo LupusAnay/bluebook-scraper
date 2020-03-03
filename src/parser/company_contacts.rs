@@ -1,8 +1,6 @@
 use crate::data::CompanyContact;
 use crate::parser::Error;
-use reqwest::Client;
 use select::document::Document;
-use select::node::Node;
 use select::predicate::{Attr, Class, Name, Predicate};
 
 pub async fn get_contacts(page: &Document) -> Result<Vec<CompanyContact>, Error> {

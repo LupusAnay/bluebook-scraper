@@ -22,12 +22,13 @@ pub async fn client_factory() -> Client {
 
     Client::builder()
         .proxy(proxy)
+        .cookie_store(true)
         .build()
         .expect("Cannot build reqwest client")
 }
 
 pub async fn get_search_page(
-    client: Client,
+    client: &Client,
     class_id: i32,
     page_number: i32,
     city: &str,
@@ -43,18 +44,20 @@ pub async fn get_search_page(
         ])
         .header("User-Agent", get_random_user_agent().await)
         .send()
-        .await?;
+        .await?
+        .error_for_status()?;
 
     let page = Document::from(response.text().await?.as_str());
     Ok(page)
 }
 
-pub async fn get_company_page(client: Client, company_id: i32) -> ApiResult {
+pub async fn get_company_page(client: &Client, company_id: i32) -> ApiResult {
     let response = client
         .get(format!("{}/{}", COMPANY_PAGE_URL, company_id).as_str())
         .header("User-Agent", get_random_user_agent().await)
         .send()
-        .await?;
+        .await?
+        .error_for_status()?;
 
     let page = Document::from(response.text().await?.as_str());
     Ok(page)
@@ -65,7 +68,35 @@ pub async fn get_locations_page(client: Client, company_id: i32) -> ApiResult {
         .get(format!("{}/{}/locations-contacts/", COMPANY_PAGE_URL, company_id).as_str())
         .header("User-Agent", get_random_user_agent().await)
         .send()
-        .await?;
+        .await?
+        .error_for_status()?;
+
+    let page = Document::from(response.text().await?.as_str());
+    Ok(page)
+}
+
+pub async fn get_categories_page(
+    client: &Client,
+    company_id: i32,
+    div_id: &str,
+    head_id: Option<&str>,
+) -> ApiResult {
+    let company_id_str = company_id.to_string();
+    let mut params = vec![("qp", company_id_str.as_str()), ("id", div_id), ("v", "7")];
+
+    match head_id {
+        Some(id) => params.push(("headingID", id)),
+        None => (),
+    }
+
+    let request = client
+        .post(CATEGORIES_SEARCH_URL)
+        .form(&params)
+        .header("User-Agent", get_random_user_agent().await)
+        .header("X-Requested-With", "XMLHttpRequest")
+        .header("Referer", "http://www.thebluebook.com/iProView/400516")
+        .build()?;
+    let response = client.execute(request).await?.error_for_status()?;
 
     let page = Document::from(response.text().await?.as_str());
     Ok(page)
@@ -76,9 +107,37 @@ mod tests {
     use crate::api::*;
 
     #[tokio::test]
+    async fn test_get_categories() {
+        let client = client_factory().await;
+        // Set Cookies
+        get_search_page(&client, 64, 1, "New York, NY")
+            .await
+            .unwrap();
+        get_company_page(&client, 400516).await.unwrap();
+
+        let page = get_categories_page(&client, 400516, "17", None)
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    async fn test_get_categories_with_heading_id() {
+        let mut client = client_factory().await;
+        // Set Cookies
+        get_search_page(&mut client, 64, 1, "New York, NY")
+            .await
+            .unwrap();
+        let resp = get_company_page(&mut client, 400516).await.unwrap();
+
+        let page = get_categories_page(&mut client, 400516, "17", Some("642"))
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
     async fn test_get_page() {
         let client = client_factory().await;
-        let page = get_search_page(client, 4030, 1, "New York, NY")
+        let page = get_search_page(&client, 4030, 1, "New York, NY")
             .await
             .unwrap();
     }
@@ -86,7 +145,7 @@ mod tests {
     #[tokio::test]
     async fn test_company_page() {
         let client = client_factory().await;
-        let page = get_company_page(client, 400516).await.unwrap();
+        let page = get_company_page(&client, 400516).await.unwrap();
     }
 
     #[tokio::test]
