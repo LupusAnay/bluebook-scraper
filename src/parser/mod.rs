@@ -9,6 +9,7 @@ mod company_categories;
 mod company_contacts;
 mod company_info;
 mod company_locations;
+mod company_service_areas;
 pub mod error;
 
 #[derive(Copy, Clone, Debug)]

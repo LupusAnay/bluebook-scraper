@@ -22,6 +22,12 @@ pub struct CompanyContact {
     pub phone: String,
 }
 
+#[derive(Debug, PartialEq)]
+pub struct ServiceArea {
+    pub state_name: String,
+    pub cities: Vec<String>,
+}
+
 pub type Category = String;
 
 pub type Project = String;
@@ -33,6 +39,7 @@ pub struct CompanyProfile {
     pub contacts: Vec<CompanyContact>,
     pub story: String,
     pub categories: Vec<Category>,
+    pub service_areas: Vec<ServiceArea>,
     pub project_experience: Vec<Project>,
     pub emails: Vec<String>,
 }
